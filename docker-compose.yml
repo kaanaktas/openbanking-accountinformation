@@ -1,0 +1,59 @@
+version: '3'
+services:
+  postgres:
+    image: 'postgres:latest'
+    ports:
+      - "5432:5432"
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=accountinformation
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./scripts/postgresql:/docker-entrypoint-initdb.d/
+  redis:
+    image: 'redis:latest'
+    restart: on-failure
+    ports:
+      - "6379:6379"
+  openbanking-accountinformation:
+    build:
+      context: .
+      dockerfile: Dockerfile.standalone
+    image: kaktas/openbanking-accountinformation
+    ports:
+      - "8080:8080"
+    command: "./account"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - KID=<CLIENT_SIGNING_KID>
+      - INTERNAL_SIGN_KEY=certs/<internal_signing.key>
+      - OB_SIGN_KEY=certs/<client_signing.key>
+      - CLIENT_CA_CERT_PEM=certs/ob_issuer.cer,certs/danske_sandbox.cer,certs/ozone_sandbox.cer
+      - CLIENT_CERT_PEM=certs/<client_transport.pem>
+      - CLIENT_KEY_PEM=certs/<client_transport.key>
+      - DRIVER_NAME=postgres
+      - DATASOURCE_URL=postgres://postgres:postgres@postgres:5432/accountinformation?sslmode=disable
+      - REDIS_HOST=redis:6379
+  openbanking-accountinformation_callback:
+    image: kaktas/openbanking-accountinformation
+    ports:
+      - "8081:8081"
+    command: "./callback"
+    depends_on:
+      - openbanking-accountinformation
+    environment:
+      - KID=<CLIENT_SIGNING_KID>
+      - INTERNAL_SIGN_KEY=certs/<internal_signing.key>
+      - OB_SIGN_KEY=certs/<client_signing.key>
+      - CLIENT_CA_CERT_PEM=certs/ob_issuer.cer,certs/danske_sandbox.cer,certs/ozone_sandbox.cer
+      - CLIENT_CERT_PEM=certs/<client_transport.pem>
+      - CLIENT_KEY_PEM=certs/<client_transport.key>
+      - DRIVER_NAME=postgres
+      - DATASOURCE_URL=postgres://postgres:postgres@postgres:5432/accountinformation?sslmode=disable
+      - REDIS_HOST=redis:6379
+volumes:
+  postgres-data:
+    driver: local

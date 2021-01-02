@@ -1,0 +1,26 @@
+FROM golang:1.15-alpine as builder
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+
+RUN go mod download
+
+COPY . .
+
+# Build account main
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o account ./cmd/account
+# Build callback main
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o callback ./cmd/callback
+
+FROM scratch
+
+WORKDIR /root/
+
+COPY --from=builder /app/account .
+COPY --from=builder /app/callback .
+
+# Copy certs folder where you keep your certs and keys(not recommended for prod)
+COPY ./certs ./certs
+
+EXPOSE 8080 8081
