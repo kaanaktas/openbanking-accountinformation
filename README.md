@@ -1,5 +1,3 @@
-![openbanking-accountinformation-ci](https://github.com/kaanaktas/openbanking-accountinformation/workflows/openbanking-accountinformation-ci/badge.svg)
-
 ### **IMPORTANT**: DON'T FORGET TO HANDLE TOKENS, SECRETS, CERTIFICATES(public and private keys), CLIENT_IDS AND PASSWORDS SECURELY.
 
 Introduction
