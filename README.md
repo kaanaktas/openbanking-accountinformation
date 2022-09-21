@@ -1,3 +1,5 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ### **IMPORTANT**: DON'T FORGET TO HANDLE TOKENS, SECRETS, CERTIFICATES(public and private keys), CLIENT_IDS AND PASSWORDS SECURELY.
 
 Introduction
